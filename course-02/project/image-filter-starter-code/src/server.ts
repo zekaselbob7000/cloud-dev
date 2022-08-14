@@ -1,4 +1,5 @@
-import express from 'express';
+//import express from 'express';
+import express, { Router, Request, Response } from 'express';
 import bodyParser from 'body-parser';
 import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
@@ -36,6 +37,34 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   app.get( "/", async ( req, res ) => {
     res.send("try GET /filteredimage?image_url={{}}")
   } );
+
+  app.get( "/filteredimage",async ( req: Request, res: Response ) => {
+    let { image_url } = req.query;
+
+    if ( !image_url ) {
+      return res.status(400)
+                .send(`image_url is required`);
+    }
+    const FilteredImage= await filterImageFromURL(image_url.toString());
+    return res.status(200)
+              .sendFile(FilteredImage,()=>{
+                deleteLocalFiles([FilteredImage]);
+              });
+} );
+
+app.get( "/persons1/:name", 
+( req: Request, res: Response ) => {
+  let { name } = req.params;
+
+  if ( !name ) {
+    return res.status(400)
+              .send(`name is required`);
+  }
+
+  return res.status(200)
+            .send(`Welcome to the Cloud, ${name}!`);
+} );
+
   
 
   // Start the Server
